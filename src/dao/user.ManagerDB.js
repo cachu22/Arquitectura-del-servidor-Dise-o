@@ -11,8 +11,8 @@ export class usersManagerDB {
       return users
   }
   
-    async createUser(user) {
-      return await this.userModel.create(user)
+    async createUser(newUser) {
+      return await this.userModel.create(newUser)
     }
   
     async getUserBy(filter) {

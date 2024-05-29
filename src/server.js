@@ -23,6 +23,8 @@ import cookieParser from 'cookie-parser';
 import routerCookie from './Routes/Cookies/pruebas.router.js';
 import session from 'express-session';
 import sessionsRouter from './Routes/Sessions/sessions.router.js';
+import passport from 'passport';
+import { initializePassport } from './config/passport.config.js';
 
 //session file storage => persistencia en archivo de la sesión
 import FileStore from 'session-file-store'
@@ -88,6 +90,9 @@ app.use(session({
     resave: true,
     saveUninitialized: true
 }))
+initializePassport()
+app.use(passport.initialize())
+app.use(passport.session())
 
 //middlewares
 app.use('/cookies', routerCookie)
@@ -141,7 +146,7 @@ app.post('/upload-file', multerSingleUploader, (req, res) => {
 app.use('/api/products', productsRouterLF);
 // Ruta para carts
 app.use('/api/carts', cartsRouterFS);
-// Ruta para session
+// Ruta para session (local host) falta el githubcallback
 app.use('/api/sessions', sessionsRouter)
 
 
