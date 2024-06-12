@@ -37,7 +37,6 @@ const cartData = JSON.parse(fs.readFileSync(__dirname + '/file/carts.json', 'utf
 
 // Crea una aplicación express
 const app = express();
-const server = createServer(app);
 
 // Crear servidor HTTP utilizando la aplicación express
 const httpServer = createServer(app);
@@ -52,7 +51,8 @@ httpServer.listen(8080, () => {
 
 // Servir archivos estáticos
 app.use(express.static(__dirname + '/Public'));
-app.use(cookieParser('s3cr3t@Firma'))
+app.use(cookieParser())
+    //('s3cr3t@Firma')) esto era de la linea de arriba al lado de cookieParser
 
 //sessions
 // app.use(session({
@@ -79,10 +79,6 @@ app.use(cookieParser('s3cr3t@Firma'))
 app.use(session({
     store:  MongoStore.create({
         mongoUrl:'mongodb+srv://ladrianfer87:u7p7QfTyYPoBhL9j@cluster0.8itfk8g.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0',
-        mongoOptions: {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        },
         //que la sid dure un día
         ttl: 60 * 60 * 1000 * 24
     }),
@@ -147,7 +143,7 @@ app.use('/api/products', productsRouterLF);
 // Ruta para carts
 app.use('/api/carts', cartsRouterFS);
 // Ruta para session (local host) falta el githubcallback
-app.use('/api/sessions', sessionsRouter)
+app.use('/api/sessions', sessionsRouter);
 
 
         //Rutas para DB

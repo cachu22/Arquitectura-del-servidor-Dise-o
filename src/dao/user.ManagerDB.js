@@ -2,24 +2,22 @@ import { userModel } from "./models/users.models.js";
 
 export class usersManagerDB {
   constructor(){
-    this.userModel = userModel;
+    this.model = userModel;
     }
-  
-    // Método para obtener todos los usuarios
-    async getUsers({ limit = 10, numPage=1}) {
-      const users = await this.userModel.paginate({}, {limit, page: numPage, sort: {price: -1}, lean: true })
-      return users
-  }
-  
-    async createUser(newUser) {
-      return await this.userModel.create(newUser)
-    }
-  
-    async getUserBy(filter) {
-      return this.userModel.findOne(filter);
-    }
-  
-    async gerUserby(email) {
-    return this.users.find((user) => user.email === email);
-    }
-  }
+
+    // async getUser(filter) {
+    //     if (!this.model) {
+    //         throw new Error('Model is not defined');
+    //     }
+    //     return await this.model.findOne(filter);
+    // }
+
+    // async createUser(newUser) {
+    //     if (!this.model) {
+    //         throw new Error('Model is not defined');
+    //     }
+    //     return await this.model.create(newUser);
+    // }
+    getUser = async filter => await this.model.findOne(filter)
+    createUser = async newUser => await this.model.create(newUser)
+}

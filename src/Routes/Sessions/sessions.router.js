@@ -1,50 +1,22 @@
 // session -> login - register - logout
-import {Router} from 'express'
-import { usersManagerDB } from '../../dao/user.ManagerDB.js'
-import { createHash, isValidPassword } from '../../utils/bcrypt.js'
-import passport from 'passport'
+import { Router } from 'express';
+import { usersManagerDB } from '../../dao/user.ManagerDB.js';
+import { createHash, isValidPassword } from '../../utils/bcrypt.js';
+import passport from 'passport';
+import { generateToken } from '../../utils/jwt.js';
+import { passportCall } from '../../middlewares/passportCall.middleware.js';
+import { authorization } from '../../middlewares/Authorization.middleware.js';
 
-export const sessionsRouter = Router()
+export const sessionsRouter = Router();
 
-const userService = new usersManagerDB()
+const userService = new usersManagerDB();
 
-sessionsRouter.get('/github', passport.authenticate('github', {scome: 'user:email'}), async (req, res)=> {})
+sessionsRouter.get('/github', passport.authenticate('github', { scope: 'user:email' }), async (req, res) => {});
 
-sessionsRouter.get('/githubcallback', passport.authenticate('github', {failureRedirect: '/login'}), (req, res)=> {
-    req.session.user = req.user   
-    res.redirect('/') 
-})
-
-// sessionsRouter.post('/register', async (req, res) => {
-//     try {
-
-//         const {first_name,  last_name, email, password} = req.body
-
-//         //Validar si vienen los datos
-//         if(!email || !password) return res.status(401).send({status: 'error', error: 'Se deben completar todos los datos'})
-    
-//         //validar si existe el usuario
-//         const userExist = await userService.getUserBy({email})
-//         if(userExist) return res.status(401).send({status: 'error', error: 'el usuario ya existe'})
-    
-//             const newUser = {
-//                 first_name,
-//                 last_name,
-//                 email,
-//                 password :createHash(password)
-//             }
-        
-//             const result = await userService.createUser(newUser)
-//             //Validar
-//             console.log(result);
-    
-//         res.redirect('/')
-
-//     } catch (error) {
-//         console.log(error);
-//     }
-     
-// })
+sessionsRouter.get('/githubcallback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
+    req.session.user = req.user;
+    res.redirect('/');
+});
 
 // sessionsRouter.post('/login', async (req, res) => {
 //     const { email, password } = req.body;
@@ -82,8 +54,78 @@ sessionsRouter.get('/githubcallback', passport.authenticate('github', {failureRe
 //     res.redirect('/');
 // });
 
-sessionsRouter.post('/register', passport.authenticate('register', { failureRedirect: '/failregister' }), async (req, res) => {
-    res.send({ status: 'success', message: 'User Registrado' });
+// sessionsRouter.post('/register', async (req, res) => {
+//     try {
+
+//         const {first_name,  last_name, email, password} = req.body
+
+//         //Validar si vienen los datos
+//         if(!email || !password) return res.status(401).send({status: 'error', error: 'Se deben completar todos los datos'})
+    
+//         //validar si existe el usuario
+//         const userExist = await userService.getUserBy({email})
+//         if(userExist) return res.status(401).send({status: 'error', error: 'el usuario ya existe'})
+    
+//             const newUser = {
+//                 first_name,
+//                 last_name,
+//                 email,
+//                 password :createHash(password)
+//             }
+        
+//             const result = await userService.createUser(newUser)
+//             //Validar
+//             console.log(result);
+    
+//         res.redirect('/')
+
+//     } catch (error) {
+//         console.log(error);
+//     }
+     
+// })
+
+sessionsRouter.post('/register', async (req, res) => {
+    console.log('Se recibió una solicitud de registro');
+
+    const { first_name, last_name, password, email} = req.body;
+    
+    //validación
+    if(!password || !email) {
+        console.log('Error: Faltan credenciales en la solicitud de registro');
+        return res.status(401).send({status: 'error', message: 'Debe ingresar todas las credenciales'});
+    }
+
+    //revisar si existe el usuario
+    console.log('Buscando usuario en la base de datos...');
+    const userFound = await userService.getUser({email});
+
+    if(userFound) {
+        console.log('Error: El usuario ya existe');
+        return res.status(401).send({status: 'error', message: 'El usuario ya existe'});
+    }
+    
+    const newUser = {
+        first_name,
+        last_name,
+        email,
+        password: createHash(password)
+    };
+
+    console.log('Creando un nuevo usuario en la base de datos...');
+    const result = await userService.createUser(newUser)
+
+    const token = generateToken({
+        id: result._id
+    });
+
+    console.log('Usuario registrado exitosamente');
+    res
+    .cookie('token', token, {
+        maxAge: 60*60*1000*24,
+        httpOnly: true
+    })
+    .send({status: 'success', message: 'Usuario registrado exitosamente'});
 });
 
 sessionsRouter.post('/failregister', async (req, res) => {
@@ -91,23 +133,47 @@ sessionsRouter.post('/failregister', async (req, res) => {
     res.send({ error: 'failed' });
 });
 
-sessionsRouter.post('/login', passport.authenticate('login', { failureRedirect: '/faillogin' }), async (req, res) => {
-    if (!req.user) return res.status(400).send({ status: 'error', error: 'credenciales invalidas' });
-    req.session.user = {
-        first_name: req.user.first_name,
-        last_name: req.user.last_name,
-        email: req.user.email
-    };
-    res.send({ status: 'success', payload: req.user });
+sessionsRouter.post('/login', async (req, res) => {
+    const { password, email } = req.body
+    //validación
+    if(!password || !email) return res.status(401).send({status: 'error', message: 'debe ingresar todas las credenciales'})
+    //revisar si existe el usuario
+    const userFound = await userService.getUser({email})
+
+    if (!isValidPassword({password: userFound.password}, password)) return res.status(401).send({status: 'error', message: 'no coinciden las credenciales'})
+        
+        const token = generateToken({
+            email: userFound.email,
+            id: userFound._id,
+            role: userFound.role
+        })
+        
+    res
+        .cookie('token', token, {
+        maxAge: 60*60*1000*24,
+        httpOnly: true
+    })
+    .send({status: 'success', message: 'usuario logueado'})
 });
+
+
+
+//     if (!req.user) return res.status(400).send({ status: 'error', error: 'credenciales invalidas' });
+//     req.session.user = {
+//         first_name: req.user.first_name,
+//         last_name: req.user.last_name,
+//         email: req.user.email
+//     };
+//     res.redirect('/');
+// });
 
 sessionsRouter.post('/faillogin', (req, res) => {
     res.send({ error: 'falló el login' });
 });
 
-sessionsRouter.get('/current', (req, res) => {
-    res.send('datos sensibles');
-});
+sessionsRouter.get('/current', passportCall('jwt'), authorization('user'), async (req, res) => {
+    res.send('datos sensibles')
+})
 
 sessionsRouter.get('/logout', (req, res) => {
     req.session.destroy(err => {
