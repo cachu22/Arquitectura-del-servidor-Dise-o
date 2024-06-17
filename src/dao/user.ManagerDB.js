@@ -1,23 +1,25 @@
+import mongoose from "mongoose";
 import { userModel } from "./models/users.models.js";
 
 export class usersManagerDB {
-  constructor(){
-    this.model = userModel;
+  async getUser(query) {
+    if (typeof query === 'string') {
+      if (!mongoose.Types.ObjectId.isValid(query)) {
+        throw new Error('Invalid user ID');
+      }
+      return userModel.findOne({ _id: query });
     }
+    return userModel.findOne(query);
+  }
 
-    // async getUser(filter) {
-    //     if (!this.model) {
-    //         throw new Error('Model is not defined');
-    //     }
-    //     return await this.model.findOne(filter);
-    // }
+  async getUserById(id) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error('Invalid user ID');
+    }
+    return userModel.findOne({ _id: id });
+  }
 
-    // async createUser(newUser) {
-    //     if (!this.model) {
-    //         throw new Error('Model is not defined');
-    //     }
-    //     return await this.model.create(newUser);
-    // }
-    getUser = async filter => await this.model.findOne(filter)
-    createUser = async newUser => await this.model.create(newUser)
+  async createUser(newUser) {
+    return userModel.create(newUser); // Utiliza userModel.create para crear un nuevo usuario
+  }
 }

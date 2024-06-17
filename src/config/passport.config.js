@@ -3,7 +3,7 @@ import GithubStrategy from 'passport-github2';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { usersManagerDB } from '../dao/user.ManagerDB.js';
 import { createHash, isValidPassword } from '../utils/bcrypt.js';
-import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'; // Corrección aquí
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import { PRIVATE_KEY } from '../utils/jwt.js';
 
 const userService = new usersManagerDB();
@@ -15,14 +15,19 @@ const cookieExtractor = req => {
 }
 
 export const initializePassport = () => {
-    passport.use('jwt', new JwtStrategy({ // Corrección aquí
-        jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]), // Corrección aquí
+    passport.use('jwt', new JwtStrategy({
+        jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
         secretOrKey: PRIVATE_KEY
     }, async (jwt_payload, done) => {
         try {
-            return done(null, jwt_payload);
+            const user = await userService.getUser(jwt_payload.id); // Pasa el id como un objeto
+            if (user) {
+                return done(null, user);
+            } else {
+                return done(null, false);
+            }
         } catch (error) {
-            return done(error);
+            return done(error, false);
         }
     }));
 };
