@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { userModel } from "./models/users.models.js";
 
-export class usersManagerDB {
+class usersManagerDB {
   async getUser(query) {
     if (typeof query === 'string') {
       if (!mongoose.Types.ObjectId.isValid(query)) {
@@ -23,3 +23,5 @@ export class usersManagerDB {
     return userModel.create(newUser); // Utiliza userModel.create para crear un nuevo usuario
   }
 }
+
+export default usersManagerDB

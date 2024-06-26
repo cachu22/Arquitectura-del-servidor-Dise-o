@@ -1,5 +1,5 @@
 import { Router } from "express";
-import CartManagerDB from "../../dao/carts.ManagerDB.js";
+import CartManagerDB from "../../daos/cartsDao.mongo.js";
 import { adminOrUserAuth } from "../../middlewares/Auth.middleware.js"
 
 const cartsRouterMSG = Router()

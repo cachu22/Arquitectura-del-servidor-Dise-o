@@ -1,7 +1,7 @@
 import passport from 'passport';
 import GithubStrategy from 'passport-github2';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { usersManagerDB } from '../dao/user.ManagerDB.js';
+import usersManagerDB from '../daos/usersDao.mongo.js';
 import { createHash, isValidPassword } from '../utils/bcrypt.js';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import { PRIVATE_KEY } from '../utils/jwt.js';

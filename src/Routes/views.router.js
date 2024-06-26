@@ -3,12 +3,12 @@ import { Router } from "express";
 import fs from 'fs';
 import { __dirname } from "../utils/utils.js";
 import { multerSingleUploader } from "../utils/multer.js";
-import productsManagerDB from "../dao/product.ManagerDB.js";
-import CartManagerDB from "../dao/carts.ManagerDB.js";
+import { ProductDaosMongo } from "../daos/productsDao.mongo.js";
+import CartManagerDB from "../daos/cartsDao.mongo.js";
 import { adminOrUserAuth } from "../middlewares/Auth.middleware.js";
 import { adminAuth } from "../middlewares/Auth.middleware.js";
 
-const productsManagerMongo = new productsManagerDB()
+const productsManagerMongo = new ProductDaosMongo()
 
 // Cargar los datos de productos localfile
 const productsData = JSON.parse(fs.readFileSync(__dirname + '/file/products.json', 'utf-8'));

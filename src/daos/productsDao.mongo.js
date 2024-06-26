@@ -1,6 +1,6 @@
 import { productModel } from "./models/products.models.js";
 
-class productsManagerDB {
+export class ProductDaosMongo {
     constructor() {
         this.productModel = productModel;
     }
@@ -71,5 +71,3 @@ class productsManagerDB {
         return await this.productModel.deleteOne({_id: productId});
     }
 }
-
-export default productsManagerDB

@@ -1,7 +1,7 @@
 // session -> login - register - logout
 import { Router } from 'express';
-import { usersManagerDB } from '../../dao/user.ManagerDB.js';
-import CartManagerDB from '../../dao/carts.ManagerDB.js';
+import usersManagerDB from '../../daos/usersDao.mongo.js';
+import CartManagerDB from '../../daos/cartsDao.mongo.js';
 import { createHash, isValidPassword } from '../../utils/bcrypt.js';
 import passport from 'passport';
 import { generateToken } from '../../utils/jwt.js';
@@ -96,7 +96,7 @@ sessionsRouter.post('/login', async (req, res) => {
         maxAge: 60*60*1000*24,
         httpOnly: true
     })
-    .send({status: 'success', message: 'usuario logueado'})
+    .send({status: 'success', message: 'Te has logueado correctamente!'})
 });
 
 sessionsRouter.post('/faillogin', (req, res) => {

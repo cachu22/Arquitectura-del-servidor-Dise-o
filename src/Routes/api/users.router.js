@@ -1,14 +1,21 @@
-import express from 'express';
-import userManager from '../../dao/user.Manager.js'
+import { Router } from 'express'
+import UserController from '../../controllers/users.controller.js'
 
-const usersRouter = express.Router()
-const userService = new userManager();
+const router = Router()
+const {
+  getUsers,
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser
+} = new UserController()
 
-// Endpoint para traer todos los usuarios de la DB
-usersRouter.get('/', async (req, res) => {
-    const result = await userService.getUsers();
-    console.log(users)
-    res.send({status: 'success', payload: result})
-})
 
-export default usersRouter
+router.get('/',        getUsers)
+router.get('/:uid',    getUser)
+router.post('/',       createUser)
+router.put('/:uid',    updateUser)
+router.delete('/:uid', deleteUser)
+
+
+export default router

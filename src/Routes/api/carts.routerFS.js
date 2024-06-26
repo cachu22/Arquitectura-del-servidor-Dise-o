@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 
 import { Router } from 'express';
-import CartManager from '../../dao/carts.Manager.js';
+import CartManager from '../../daos/cartsDao.js';
 
 const routerFSC = Router()
 export const cartManager = new CartManager('./src/file/carts.json');

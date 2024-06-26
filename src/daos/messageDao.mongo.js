@@ -1,9 +1,9 @@
 import express from 'express';
-const routerMSG = express.Router();
-import { messageModel } from '../../dao/models/message.models.js';
+const messageRouter = express.Router();
+import { messageModel } from './models/message.models.js';
 
 // Ruta para guardar un nuevo mensaje
-routerMSG.post('/save-message', async (req, res) => {
+messageRouter.post('/save-message', async (req, res) => {
     const { user, message } = req.body;
     try {
         // Guardar el mensaje en la base de datos utilizando el MessageModel
@@ -17,4 +17,4 @@ routerMSG.post('/save-message', async (req, res) => {
     }
 });
 
-export default routerMSG;
+export default messageRouter;
