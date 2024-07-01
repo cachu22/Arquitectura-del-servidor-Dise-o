@@ -1,10 +1,8 @@
-import { Command } from 'commander'
-
 const program = new Command()
 
 program
     .option('-d', 'Variable para debug', false)
-    .option('-p <port>', 'Puerto del server', 8080)
+    .option('-p <port>', 'Puerto del server', 8000)
     .option('--mode <mode>', 'Modo de trabajo de mi server', 'Production')
     .option('-u <user>', 'Usuario utilizando el applicativo', 'No se ha declarado')
     .option('-l, --letters [Letters...]', 'specify letter')

@@ -1,7 +1,7 @@
 import express from 'express';
 import productController from '../../controllers/product.controller.js';
 
-const productsRouterDB = express.Router();
+const mgProducts = express.Router();
 const {
     getAllProducts,
     getAllProductsPaginated,
@@ -15,30 +15,30 @@ const {
 }= new productController()
 
 // Rutas para productos de MongoDB
-productsRouterDB.get('/', getAllProducts);
+mgProducts.get('/', getAllProducts);
 
 // Consulta para traer los productos con paginación
-productsRouterDB.get('/products', getAllProductsPaginated);
+mgProducts.get('/products', getAllProductsPaginated);
 
 // Consulta para traer productos filtrados por categoría:
-productsRouterDB.get('/products/category/:category', getProductsByCategory);
+mgProducts.get('/products/category/:category', getProductsByCategory);
 
 // Consulta para traer productos filtrados por disponibilidad
-productsRouterDB.get('/products/status/:availability', getProductsAvailability);
+mgProducts.get('/products/status/:availability', getProductsAvailability);
 
 //Consulta para traer productos ordenados por precio
-productsRouterDB.get('/products/sort/:sortByPrice/:order', getProductsByPrice);
+mgProducts.get('/products/sort/:sortByPrice/:order', getProductsByPrice);
 
 // Ruta para traer un producto por su id
-productsRouterDB.get('/:pid', getProductById);
+mgProducts.get('/:pid', getProductById);
 
 // Ruta para agregar un nuevo producto
-productsRouterDB.post('/', post);
+mgProducts.post('/', post);
 
 // Ruta para actualizar un producto por su ID
-productsRouterDB.put('/:pid', put);
+mgProducts.put('/:pid', put);
 
 // Ruta para eliminar un producto por su ID
-productsRouterDB.delete('/:pid', deleteProduct);
+mgProducts.delete('/:pid', deleteProduct);
 
-export default productsRouterDB;
+export default mgProducts;

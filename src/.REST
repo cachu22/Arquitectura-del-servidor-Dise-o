@@ -1,13 +1,13 @@
 			//Tratar consultas y solicitudes sobre la DB
 			//PRODUCTOS
 ### Consulta para traer todos los productos de mi DB
-GET http://127.0.0.1:8080/mgProducts/
+GET http://localhost:8000/mgProducts/
 
 ### Consulta para traer los productos con paginación
-GET http://127.0.0.1:8080/mgProducts/products/
+GET http://127.0.0.1:8000/mgProducts/products/
 
 ### Obtener productos filtrados por categoría
-GET http://127.0.0.1:8080/mgProducts/products/category/Escape/
+GET http://127.0.0.1:8000/mgProducts/products/category/Escape/
 # Utilizar: Iluminacion, Motor o Escape
 
 ### Obtener productos filtrados por disponibilidad

@@ -1,7 +1,9 @@
-import { Command } from 'commander'
+import { Command } from 'commander';
 
-export const program = new Command()
+const program = new Command();
 
- program
-    .option('--mode <mode>', 'Modo de trabajo de mi server', 'Production')
-    .parse()
+program
+    .option('--mode <mode>', 'Modo de ejecución', 'development')
+    .parse(process.argv);
+
+export { program };

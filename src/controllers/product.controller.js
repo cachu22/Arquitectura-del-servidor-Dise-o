@@ -1,36 +1,79 @@
 import { productService } from "../service/index.js";
 
-class productController {
-    constructor(){
-        this.productService = productService
+class ProductController {
+    constructor() {
+        this.productService = productService;
     }
 
     getAllProducts = async (req, res) => {
         try {
-          const limit = parseInt(req.query.limit) || 0;
-          const result = await this.productService.getProducts()
-          console.log(result);
-          res.send({ status: 'success', payload: result });
-        } catch (error) {
-          console.error(error);
-          res.status(500).send({ status: 'error', message: 'Error al obtener todos los productos' });
-        }
-      }
+            const {
+                limit,
+                numPage,
+                category,
+                status,
+                sortByPrice,
+                order,
+                explain,
+                availability
+            } = req.query;
 
-    getAllProductsPaginated = async (req, res) => {
-        try {
-            const result = await this.productService.getAllProducts
+            const parsedLimit = parseInt(limit, 10);
+            const parsedNumPage = parseInt(numPage, 10);
+            const parsedExplain = explain === 'true';
+            const parsedAvailability = availability === 'true';
+
+            const result = await this.productService.getProducts({
+                limit,
+                numPage,
+                category,
+                status,
+                sortByPrice,
+                order,
+                explain,
+                availability
+            });
+
             res.send({ status: 'success', payload: result });
         } catch (error) {
-            console.error('Error al obtener todos los productos:', error);
-            res.status(500).send({ status: 'error', message: 'Error al obtener productos' });
+            console.error(error);
+            res.status(500).send({ status: 'error', message: 'Error al obtener todos los productos' });
         }
     }
+
+    getAllProductsPaginated = async (req, res) => {
+        const { limit = 10, numPage = 1, category, status, sortByPrice, order = 'asc', explain = 'false', availability = 'false' } = req.query;
+        
+        try {
+            const parsedLimit = parseInt(limit, 10);
+            const parsedNumPage = parseInt(numPage, 10);
+    
+            if (isNaN(parsedLimit) || isNaN(parsedNumPage)) {
+                return res.status(400).send({ status: 'error', message: 'Limit or numPage is not a number' });
+            }
+    
+            const result = await this.productService.getProducts({ 
+                limit: parsedLimit, 
+                numPage: parsedNumPage, 
+                category, 
+                status, 
+                sortByPrice, 
+                order: order === 'asc' ? 1 : -1, 
+                explain: explain === 'true', 
+                availability: availability === 'true' 
+            });
+    
+            res.send({ status: 'success', payload: result });
+        } catch (error) {
+            console.error('Error al obtener productos paginados:', error);
+            res.status(500).send({ status: 'error', message: 'Error al obtener productos' });
+        }
+    };
 
     getProductsByCategory = async (req, res) => {
         const category = req.params.category;
         try {
-            const result = await manager.getProducts({ category });
+            const result = await this.productService.getProducts({ category });
             res.send({ status: 'success', payload: result });
         } catch (error) {
             console.error('Error al obtener productos por categoría:', error);
@@ -41,7 +84,7 @@ class productController {
     getProductsAvailability = async (req, res) => {
         const availability = req.params.availability === 'true';
         try {
-            const result = await manager.getProducts({ availability });
+            const result = await this.productService.getProducts({ availability });
             res.send({ status: 'success', payload: result });
         } catch (error) {
             console.error('Error al obtener productos por disponibilidad:', error);
@@ -53,16 +96,12 @@ class productController {
         const sortByPrice = req.params.sortByPrice === 'price' ? 'price' : null;
         const order = req.params.order === 'asc' ? 1 : req.params.order === 'desc' ? -1 : null;
     
-        // Imprimir los valores recibidos en la consola para depurar
-        console.log('sortByPrice:', sortByPrice);
-        console.log('order:', order);
-    
         if (!sortByPrice || order === null) {
             return res.status(400).send({ status: 'error', message: 'Parámetros de ordenamiento no válidos' });
         }
     
         try {
-            const result = await manager.getProducts({ sortByPrice, order });
+            const result = await this.productService.getProducts({ sortByPrice, order });
             res.send({ status: 'success', payload: result });
         } catch (error) {
             console.error('Error al obtener productos ordenados por precio:', error);
@@ -73,7 +112,7 @@ class productController {
     getProductById = async (req, res) => {
         const { pid } = req.params;
         try {
-            const result = await this.productService.getProductById
+            const result = await this.productService.getProductById(pid);
             if (!result) {
                 res.status(404).send({ status: 'error', message: 'No se encontró el ID especificado' });
             } else {
@@ -87,8 +126,7 @@ class productController {
     post = async (req, res) => {
         try {
             const productData = req.body;
-            const newProduct = await this.productService.addProduct()
-            console.log('producto enviado Router', productData);
+            const newProduct = await this.productService.addProduct(productData);
             res.status(201).json({ status: 'true', payload: newProduct });
         } catch (error) {
             res.status(500).json({ status: 'error', message: 'Error al agregar un nuevo producto', error: error.message });
@@ -99,7 +137,7 @@ class productController {
         const { pid } = req.params;
         const updatedProductData = req.body;
         try {
-            const result = await manager.productController.updateProduct()
+            const result = await this.productService.updateProduct(pid, updatedProductData);
             res.send({ status: 'success', payload: result });
         } catch (error) {
             res.status(500).send({ status: 'error', message: 'Error al actualizar el producto', error: error.message });
@@ -117,4 +155,4 @@ class productController {
     }
 }
 
-export default productController
+export default ProductController;

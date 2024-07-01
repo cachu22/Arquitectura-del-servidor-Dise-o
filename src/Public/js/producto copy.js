@@ -1,19 +1,11 @@
-// Definir la URL base de tu API
-const apiUrl = 'http://localhost:8000';
-
 $(document).ready(function() {
-    fetch(`${apiUrl}/mgProducts`)
-    .then(response => response.json())
-    .then(data => {
-        console.log('La data de producto.js', data);
-    })
-    .catch(error => console.error('Error:', error));
-
+    // Obtener la configuración del puerto desde el backend
     $.ajax({
-        url: `${apiUrl}/mgProducts`,
+        url: '/api/config',
         method: 'GET',
-        success: function(data) {
-            console.log('mgProducts:', data);
+        success: function(response) {
+            const port = response.port;
+            const BASE_URL = `http://localhost:${port}`;
 
             // Asignar el evento click a los botones de detalles después de que el DOM esté listo
             $('.btn-primary').on('click', function() {
@@ -22,13 +14,13 @@ $(document).ready(function() {
 
                 // Realizar una solicitud AJAX para obtener los detalles del producto
                 $.ajax({
-                    url: `${apiUrl}/mgProducts/${productId}`,
+                    url: `${BASE_URL}/mgProducts/${productId}`,
                     method: 'GET',
                     success: function(response) {
-                        console.log("Product details received:", response);
+                        console.log("Product details received:", response); // Verificar los datos recibidos
                         if (response.status === 'success') {
                             let product = response.payload;
-                            console.log("Product details:", product);
+                            console.log("Product details:", product); // Registrar los detalles del producto
                             let modalBody = $('#productModal .modal-body');
                             modalBody.empty();
 
@@ -70,16 +62,18 @@ $(document).ready(function() {
             // Función para agregar un producto al carrito
             function addToCart(productId) {
                 console.log("Añadiendo producto al carrito:", productId);
+                // Usando id hardcodeada
                 const cartId = '664be577fa72a1055ac0ab59';
                 const data = {
-                    quantity: 1
+                    quantity: 1 // Aquí puedes ajustar la cantidad según sea necesario
                 };
                 $.ajax({
-                    url: `${apiUrl}/api/cartsDB/${cartId}/product/${productId}`,
+                    url: `${BASE_URL}/api/cartsDB/${cartId}/product/${productId}`,
                     method: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify(data),
+                    data: JSON.stringify(data), // Convierte el objeto de datos a formato JSON
                     success: function(response) {
+                        // Verificar si la respuesta es válida o no
                         if (response && response.products) {
                             Swal.fire('Éxito', 'Producto agregado al carrito', 'success');
                         } else {
@@ -98,6 +92,7 @@ $(document).ready(function() {
             $('.add-to-cart-btn').on('click', function() {
                 console.log("Botón 'Agregar al carrito' clicado");
                 let productId = $(this).data('product-id');
+                console.log(productId);
                 addToCart(productId);
             });
         },

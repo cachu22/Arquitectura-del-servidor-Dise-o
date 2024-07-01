@@ -7,6 +7,7 @@ export class ProductDaosMongo {
 
     // Traer todos los productos con filtrado y ordenamiento
     async getProducts({ limit = 9, numPage = 1, category, status, sortByPrice, order, explain = false, availability }) {
+        //console.log('Log de productsDao.mongo.js - Parámetros recibidos:', { limit, numPage, category, status, sortByPrice, order, explain, availability });
         try {
             let filter = {};
             if (category) filter.category = category;
@@ -14,11 +15,15 @@ export class ProductDaosMongo {
             if (availability !== undefined) {
                 filter.availability = availability;
             }
+
+            console.log('Log de productsDao.mongo.js - Filtros aplicados:', filter);
     
             let sort = {};
             if (sortByPrice && order) {
                 sort.price = order;
             }
+
+            console.log('Log de productsDao.mongo.js - Ordenamiento aplicado:', sort);
     
             let query = await this.productModel.paginate(
                 filter,
@@ -29,6 +34,8 @@ export class ProductDaosMongo {
                     lean: true 
                 }
             );
+
+            //console.log('Log de productsDao.mongo.js - Resultado de la consulta:', query);
     
             if (explain) {
                 return await query.explain('executionStats');
@@ -41,7 +48,7 @@ export class ProductDaosMongo {
         }
     }
 
-    //Buscar producto por su ID
+    // Buscar producto por su ID
     async getProductById(_id) {
         return await this.productModel.findById(_id);
     }
@@ -54,7 +61,7 @@ export class ProductDaosMongo {
                 console.log('En manager', productData);
                 throw new Error('El código ' + productData.code + ' ya está siendo utilizado por otro producto. Por favor, elija otro código.');
             }
-    
+
             // Si el código no está en uso, crear el nuevo producto
             const newProduct = await this.productModel.create(productData);
             return newProduct;

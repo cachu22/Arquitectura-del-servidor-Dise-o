@@ -26,13 +26,19 @@ const cartData = JSON.parse(fs.readFileSync(__dirname + '/file/carts.json', 'utf
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer);
-const { port } = objectConfig;
+const PORT = objectConfig.port;
 
 // const appUse = midd => {
 //     return app.use(mid)
 // }
 
-connectDb();
+// Conectar a la base de datos
+connectDb().then(() => {
+    console.log('Conectado a la base de datos archivo server');
+}).catch(error => {
+    console.error('Error al conectar a la base de datos archivo server:', error);
+    process.exit(1);
+});
 connectDb();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -41,14 +47,17 @@ app.use(cookieParser());
 initializePassport();
 app.use(passport.initialize());
 
-dotenv.config();
+const mode = process.argv[2] === '--mode' && process.argv[3] ? process.argv[3] : 'development';
+const envFilePath = `.env.${mode}`;
+
+dotenv.config({ path: envFilePath });
 
 app.use(cors());
 
 // Sessions con mongo
 app.use(session({
     store: MongoStore.create({
-        mongoUrl: 'mongodb+srv://ladrianfer87:u7p7QfTyYPoBhL9j@cluster0.8itfk8g.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0',
+        mongoUrl: 'mongodb://localhost:27017/ecommerce',
         ttl: 60 * 60 * 1000 * 24
     }),
     secret: 's3cr3etc@d3r',
@@ -89,9 +98,12 @@ app.get('/api/config', (req, res) => {
 
 const manager = new ProductManager(`${__dirname}/file/products.json`);
 
-httpServer.listen(port, error => {
-    if (error) console.log(error);
-    console.log('server escuchando en el puerto' + port);
+httpServer.listen(PORT, (error) => {
+    if (error) {
+        console.log(error);
+    } else {
+        console.log(`Server listening on port ${PORT}`);
+    }
 });
 
 io.on('connection', (socket) => {
