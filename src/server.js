@@ -13,7 +13,7 @@ import { initializePassport } from './config/passport.config.js';
 import { connectDb, objectConfig } from './config/index.js';
 import routerApp from './Routes/index.js';
 import fs from 'fs';
-import ProductManager from './daos/productDao.FS.js';
+import ProductDaoFS from './daos/MONGO/MONGODBLOCAL/productDao.FS.js';
 import viewsRouter from './Routes/views.router.js';
 import { multerSingleUploader } from './utils/multer.js';
 import { handleAddProduct } from './utils/crearProducto.js';
@@ -96,7 +96,7 @@ app.get('/api/config', (req, res) => {
     res.json({ port: objectConfig.port });
 });
 
-const manager = new ProductManager(`${__dirname}/file/products.json`);
+const manager = new ProductDaoFS(`${__dirname}/file/products.json`);
 
 httpServer.listen(PORT, (error) => {
     if (error) {

@@ -1,5 +1,5 @@
 import fs from 'fs'
-class CartManager {
+class CartDaoFS {
     constructor(path) {
         this.path = path
     }
@@ -141,4 +141,4 @@ addProductToCart = async (cid, pid) => {
 }
 };
 
-export default CartManager;
+export default CartDaoFS;

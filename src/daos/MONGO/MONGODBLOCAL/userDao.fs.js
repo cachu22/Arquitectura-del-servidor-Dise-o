@@ -1,6 +1,6 @@
-import { userModel } from "./models/users.models.js";
+import { userModel } from "../../models/users.models.js";
 
-class userManager {
+class userDaoFS {
   constructor(){
     this.userModel = userModel;
     }
@@ -23,4 +23,4 @@ class userManager {
   //   }
 }
 
-export default userManager
+export default userDaoFS

@@ -1,11 +1,82 @@
+// Definir la URL base de tu API
+const apiUrl = 'http://localhost:8000';
+
 $(document).ready(function() {
-    // Obtener la configuración del puerto desde el backend
+
+    // Función para crear un carrito
+    function createCart() {
+        $.ajax({
+            url: `${apiUrl}/api/cartsDB`,
+            method: 'POST',
+            contentType: 'application/json',
+            success: function(response) {
+                if (response && response.payload && response.payload._id) {
+                    // Guarda el ID del carrito en el almacenamiento local
+                    localStorage.setItem('cartId', response.payload._id);
+                    console.log("Carrito creado con ID:", response.payload._id);
+                } else {
+                    console.error('Error al crear el carrito:', response);
+                    Swal.fire('Error', 'No se pudo crear el carrito', 'error');
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('Error al crear el carrito:', textStatus, errorThrown);
+                Swal.fire('Error', 'No se pudo crear el carrito', 'error');
+            }
+        });
+    }
+
+    // Función para agregar un producto al carrito
+    function addToCart(productId) {
+        console.log("Añadiendo producto al carrito:", productId);
+        
+        // Obtener el ID del carrito del almacenamiento local
+        const cartId = localStorage.getItem('cartId');
+        console.log("ID del carrito:", cartId); // Depuración
+    
+        if (!cartId) {
+            console.error('No se encontró el ID del carrito.');
+            Swal.fire('Error', 'No se encontró el ID del carrito', 'error');
+            return;
+        }
+        
+        const data = {
+            quantity: 1
+        };
+        console.log("Datos enviados:", data); // Depuración
+        
+        $.ajax({
+            url: `${apiUrl}/api/cartsDB/${cartId}/product/${productId}`,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function(response) {
+                console.log("Respuesta del servidor:", response); // Depuración
+                if (response && response.products) {
+                    Swal.fire('Éxito', 'Producto agregado al carrito', 'success');
+                } else {
+                    console.error('Error al agregar al carrito:', response);
+                    Swal.fire('Error', 'No se pudo agregar el producto al carrito', 'error');
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('Error al agregar al carrito:', textStatus, errorThrown);
+                Swal.fire('Error', 'No se pudo agregar el producto al carrito', 'error');
+            }
+        });
+    }
+
+    // Crear un carrito en caso de que no exista
+    if (!localStorage.getItem('cartId')) {
+        createCart();
+    }
+
+    // Obtener productos
     $.ajax({
-        url: '/api/config',
+        url: `${apiUrl}/api/mgProducts`,
         method: 'GET',
-        success: function(response) {
-            const port = response.port;
-            const BASE_URL = `http://localhost:${port}`;
+        success: function(data) {
+            console.log('mgProducts:', data);
 
             // Asignar el evento click a los botones de detalles después de que el DOM esté listo
             $('.btn-primary').on('click', function() {
@@ -14,13 +85,13 @@ $(document).ready(function() {
 
                 // Realizar una solicitud AJAX para obtener los detalles del producto
                 $.ajax({
-                    url: `${BASE_URL}/mgProducts/${productId}`,
+                    url: `${apiUrl}/api/mgProducts/${productId}`,
                     method: 'GET',
                     success: function(response) {
-                        console.log("Product details received:", response); // Verificar los datos recibidos
+                        console.log("Product details received:", response);
                         if (response.status === 'success') {
                             let product = response.payload;
-                            console.log("Product details:", product); // Registrar los detalles del producto
+                            console.log("Product details:", product);
                             let modalBody = $('#productModal .modal-body');
                             modalBody.empty();
 
@@ -59,40 +130,10 @@ $(document).ready(function() {
                 });
             });
 
-            // Función para agregar un producto al carrito
-            function addToCart(productId) {
-                console.log("Añadiendo producto al carrito:", productId);
-                // Usando id hardcodeada
-                const cartId = '664be577fa72a1055ac0ab59';
-                const data = {
-                    quantity: 1 // Aquí puedes ajustar la cantidad según sea necesario
-                };
-                $.ajax({
-                    url: `${BASE_URL}/api/cartsDB/${cartId}/product/${productId}`,
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(data), // Convierte el objeto de datos a formato JSON
-                    success: function(response) {
-                        // Verificar si la respuesta es válida o no
-                        if (response && response.products) {
-                            Swal.fire('Éxito', 'Producto agregado al carrito', 'success');
-                        } else {
-                            console.error('Error al agregar al carrito:', response);
-                            Swal.fire('Error', 'No se pudo agregar el producto al carrito', 'error');
-                        }
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        console.error('Error al agregar al carrito:', textStatus, errorThrown);
-                        Swal.fire('Error', 'No se pudo agregar el producto al carrito', 'error');
-                    }
-                });
-            }
-
             // Asignar el evento click a los botones "Agregar al carrito" en la vista de tarjetas
             $('.add-to-cart-btn').on('click', function() {
                 console.log("Botón 'Agregar al carrito' clicado");
                 let productId = $(this).data('product-id');
-                console.log(productId);
                 addToCart(productId);
             });
         },

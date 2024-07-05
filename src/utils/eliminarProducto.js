@@ -1,6 +1,3 @@
-import fs from 'fs';
-// import ProductManager from '../managers/product.ManagerFS.js';
-
 // Función para eliminar un producto
 export function deleteProduct(productId, manager, io) {
     try {

@@ -12,7 +12,8 @@ dotenv.config({
 export const objectConfig = {
     port: process.env.PORT || 8000,
     mongo_uri: process.env.MONGO_URI,
-    jwt_private_key: process.env.JWT_PRIVATE_KEY
+    jwt_private_key: process.env.JWT_PRIVATE_KEY,
+    persistence: process.env.PERSISTENCE
 };
 
 // Función para conectar a la base de datos

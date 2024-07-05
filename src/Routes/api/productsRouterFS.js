@@ -1,8 +1,8 @@
 import express from 'express';
-import ProductManager from '../../daos/productDao.FS.js';
+import ProductDaoFS from '../../daos/MONGO/MONGODBLOCAL/productDao.FS.js';
 
 const router = express.Router();
-const manager = new ProductManager('./src/file/products.json');
+const manager = new ProductDaoFS('./src/file/products.json');
 
 // Rutas para productos locales
 // Ruta para listar todos los productos (GET /)

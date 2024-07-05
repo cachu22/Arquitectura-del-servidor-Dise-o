@@ -2,15 +2,80 @@
 const apiUrl = 'http://localhost:8000';
 
 $(document).ready(function() {
-    fetch(`${apiUrl}/mgProducts`)
-    .then(response => response.json())
-    .then(data => {
-        console.log('La data de producto.js', data);
-    })
-    .catch(error => console.error('Error:', error));
 
+    // Función para crear un carrito
+    function createCart() {
+        $.ajax({
+            url: `${apiUrl}/api/cartsDB`,
+            method: 'POST',
+            contentType: 'application/json',
+            success: function(response) {
+                if (response && response.payload && response.payload._id) {
+                    // Guarda el ID del carrito en el almacenamiento local
+                    localStorage.setItem('cartId', response.payload._id);
+                    console.log("Carrito creado con ID:", response.payload._id);
+                } else {
+                    console.error('Error al crear el carrito:', response);
+                    Swal.fire('Error', 'No se pudo crear el carrito', 'error');
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error('Error al crear el carrito:', textStatus, errorThrown);
+                Swal.fire('Error', 'No se pudo crear el carrito', 'error');
+            }
+        });
+    }
+
+    // Función para agregar un producto al carrito
+function addToCart(productId) {
+    console.log("Añadiendo producto al carrito:", productId);
+    
+    // Obtener el ID del carrito del almacenamiento local
+    const cartId = localStorage.getItem('cartId');
+    console.log("ID del carrito:", cartId); // Depuración
+    
+    if (!cartId) {
+        console.error('No se encontró el ID del carrito.');
+        Swal.fire('Error', 'No se encontró el ID del carrito', 'error');
+        return;
+    }
+    
+    const data = {
+        quantity: 1
+    };
+    console.log("Datos enviados:", data); // Depuración
+    
     $.ajax({
-        url: `${apiUrl}/mgProducts`,
+        url: `${apiUrl}/api/cartsDB/${cartId}/product/${productId}`,
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            console.log("Respuesta del servidor:", response); // Depuración
+            
+            // Manejar la respuesta según el status
+            if (response && response.status === 'success') {
+                Swal.fire('Éxito', 'Producto agregado al carrito', 'success');
+            } else {
+                console.error('Error al agregar al carrito:', response);
+                Swal.fire('Error', 'No se pudo agregar el producto al carrito', 'error');
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error('Error al agregar al carrito:', textStatus, errorThrown);
+            Swal.fire('Error', 'No se pudo agregar el producto al carrito', 'error');
+        }
+    });
+}
+
+    // Crear un carrito en caso de que no exista
+    if (!localStorage.getItem('cartId')) {
+        createCart();
+    }
+
+    // Obtener productos
+    $.ajax({
+        url: `${apiUrl}/api/mgProducts`,
         method: 'GET',
         success: function(data) {
             console.log('mgProducts:', data);
@@ -22,7 +87,7 @@ $(document).ready(function() {
 
                 // Realizar una solicitud AJAX para obtener los detalles del producto
                 $.ajax({
-                    url: `${apiUrl}/mgProducts/${productId}`,
+                    url: `${apiUrl}/api/mgProducts/${productId}`,
                     method: 'GET',
                     success: function(response) {
                         console.log("Product details received:", response);
@@ -66,33 +131,6 @@ $(document).ready(function() {
                     }
                 });
             });
-
-            // Función para agregar un producto al carrito
-            function addToCart(productId) {
-                console.log("Añadiendo producto al carrito:", productId);
-                const cartId = '664be577fa72a1055ac0ab59';
-                const data = {
-                    quantity: 1
-                };
-                $.ajax({
-                    url: `${apiUrl}/api/cartsDB/${cartId}/product/${productId}`,
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(data),
-                    success: function(response) {
-                        if (response && response.products) {
-                            Swal.fire('Éxito', 'Producto agregado al carrito', 'success');
-                        } else {
-                            console.error('Error al agregar al carrito:', response);
-                            Swal.fire('Error', 'No se pudo agregar el producto al carrito', 'error');
-                        }
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        console.error('Error al agregar al carrito:', textStatus, errorThrown);
-                        Swal.fire('Error', 'No se pudo agregar el producto al carrito', 'error');
-                    }
-                });
-            }
 
             // Asignar el evento click a los botones "Agregar al carrito" en la vista de tarjetas
             $('.add-to-cart-btn').on('click', function() {

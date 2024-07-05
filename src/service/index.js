@@ -1,5 +1,7 @@
-import { ProductDaosMongo } from "../daos/productsDao.mongo.js";
-import usersManagerDB from "../daos/usersDao.mongo.js"
+import { ProductDaosMongo } from "../daos/MONGO/MONGODBNUBE/productsDao.mongo.js";
+import usersDaoMongo from "../daos/MONGO/MONGODBNUBE/usersDao.mongo.js"
+import CartDaoMongo from "../daos/MONGO/MONGODBNUBE/cartsDao.mongo.js";
 
 export const productService = new ProductDaosMongo()
-export const userService = new usersManagerDB()
+export const userService = new usersDaoMongo()
+export const cartService = new CartDaoMongo()

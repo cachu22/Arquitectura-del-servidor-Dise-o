@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 
 import { Router } from 'express';
-import CartManager from '../../daos/cartsDao.js';
+import CartDaoFS from '../../daos/MONGO/MONGODBLOCAL/cartsDaoFS.js';
 
 const routerFSC = Router()
-export const cartManager = new CartManager('./src/file/carts.json');
-const manager = new CartManager('./src/file/carts.json');
+export const cartManager = new CartDaoFS('./src/file/carts.json');
+const manager = new CartDaoFS('./src/file/carts.json');
 
 let carts = [];
 

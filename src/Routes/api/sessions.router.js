@@ -1,25 +1,19 @@
 // session -> login - register - logout
 import { Router } from 'express';
-import usersManagerDB from '../../daos/usersDao.mongo.js';
-import CartManagerDB from '../../daos/cartsDao.mongo.js';
-import { createHash, isValidPassword } from '../../utils/bcrypt.js';
+import usersDaoMongo from '../../daos/MONGO/MONGODBNUBE/usersDao.mongo.js';
+import CartDaoMongo from '../../daos/MONGO/MONGODBNUBE/cartsDao.mongo.js';
 import passport from 'passport';
 import { generateToken } from '../../utils/jwt.js';
 import { passportCall } from '../../middlewares/passportCall.middleware.js';
 import { authorization } from '../../middlewares/Authorization.middleware.js';
+import { createHash, isValidPassword, generateRandomPassword } from '../../utils/bcrypt.js';
 
 export const sessionsRouter = Router();
 
-const userService = new usersManagerDB();
-
-const cartService = new CartManagerDB
+const userService = new usersDaoMongo();
+const cartService = new CartDaoMongo();
 
 sessionsRouter.get('/github', passport.authenticate('github', { scope: 'user:email' }), async (req, res) => {});
-
-sessionsRouter.get('/githubcallback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
-    req.session.user = req.user;
-    res.redirect('/');
-});
 
 sessionsRouter.post('/register', async (req, res) => {
     console.log('Se recibió una solicitud de registro');
@@ -77,26 +71,37 @@ sessionsRouter.post('/failregister', async (req, res) => {
 });
 
 sessionsRouter.post('/login', async (req, res) => {
-    const { password, email } = req.body
-    //validación
-    if(!password || !email) return res.status(401).send({status: 'error', message: 'debe ingresar todas las credenciales'})
-    //revisar si existe el usuario
-    const userFound = await userService.getUser({email})
+    const { email, password } = req.body;
 
-    if (!isValidPassword({password: userFound.password}, password)) return res.status(401).send({status: 'error', message: 'no coinciden las credenciales'})
-        
-        const token = generateToken({
-            email: userFound.email,
-            id: userFound._id,
-            role: userFound.role
-        })
-        
-    res
-        .cookie('token', token, {
-        maxAge: 60*60*1000*24,
-        httpOnly: true
-    })
-    .send({status: 'success', message: 'Te has logueado correctamente!'})
+    if (!email || !password) {
+        return res.status(401).send({ status: 'error', error: 'Se deben completar todos los datos' });
+    }
+
+    const userFound = await userService.getUser({email});
+
+    if (!userFound) {
+        return res.status(401).send({ status: 'error', error: 'Usuario no encontrado' });
+    }
+
+    req.session.user = {
+        first_name: userFound.first_name,
+        last_name: userFound.last_name,
+        email: userFound.email,
+        isAdmin: userFound.role === 'admin'
+    };
+
+    // Establecer una cookie con datos del usuario
+    res.cookie('user', JSON.stringify({
+        email: req.session.user.email,
+        first_name: req.session.user.first_name,
+        last_name: req.session.user.last_name,
+        isAdmin: req.session.user.isAdmin
+    }), { maxAge: 1000000, httpOnly: true });
+
+    console.log('datos', req.session.user);
+
+    // Redirigir a la ruta principal
+    res.redirect('/');
 });
 
 sessionsRouter.post('/faillogin', (req, res) => {
@@ -117,14 +122,26 @@ sessionsRouter.get('/logout', (req, res) => {
 // Ruta para autenticación con GitHub
 sessionsRouter.get('/github', passport.authenticate('github', { scope: ['user:email'] }));
 
-// Callback de GitHub
-sessionsRouter.get('/githubcallback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
-    req.session.user = {
+// Callback de GitHub con JWT
+sessionsRouter.get('/githubcallback', passport.authenticate('github', { failureRedirect: '/login' }), async (req, res) => {
+    // Generar un token JWT para el usuario autenticado
+    const token = generateToken({ id: req.user._id });
+
+    // Establecer una cookie con el token JWT
+    res.cookie('token', token, { maxAge: 60 * 60 * 1000 * 24, httpOnly: true });
+
+    // Establecer una cookie con los datos del usuario
+    res.cookie('user', JSON.stringify({
+        email: req.user.email,
         first_name: req.user.first_name,
         last_name: req.user.last_name,
-        email: req.user.email
-    };
-    res.redirect('/'); // Redirige a la página principal o donde desees
+        isAdmin: req.user.role === 'admin'
+    }), { maxAge: 1000000, httpOnly: true });
+
+    console.log('datos', req.user);
+
+    // Redirigir a la página principal o donde desees
+    res.redirect('/');
 });
 
 export default sessionsRouter;

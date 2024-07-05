@@ -5,8 +5,8 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Clase ProductManager
-class ProductManager {
+// Clase ProductDaoFS
+class ProductDaoFS {
   constructor(filePath) {
     this.path = filePath;
   }
@@ -151,8 +151,8 @@ updateProduct(productId, updatedFields) {
   }
   }
 
-  // Creación de una instancia de ProductManager con la ruta del archivo de productos
-  const manager = new ProductManager(`${__dirname}/file/products.json`);
+  // Creación de una instancia de ProductDaoFS con la ruta del archivo de productos
+  const manager = new ProductDaoFS(`${__dirname}/file/products.json`);
 
-// Exporta la clase ProductManager para su uso en otros archivos
-export default ProductManager;
+// Exporta la clase ProductDaoFS para su uso en otros archivos
+export default ProductDaoFS;

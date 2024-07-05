@@ -1,20 +1,17 @@
-import { Schema, model } from "mongoose";
+// models/carts.models.js
+import { Schema, model } from 'mongoose';
 
 const CartSchema = new Schema({
     products: [{
         product: {
             type: Schema.Types.ObjectId,
-            ref: 'productos'
+            ref: 'Product' // Asegúrate de que este nombre coincida con el nombre del modelo de producto en Mongoose
         },
         quantity: {
-            type: Number
+            type: Number,
+            default: 1 // Añadido un valor por defecto para evitar campos vacíos
         }
     }]
-});
-
-// Middleware para hacer populate automáticamente en find y findOne
-CartSchema.pre(['find', 'findOne'], function() {
-    this.populate('products.product');
 });
 
 export const cartsModel = model('Cart', CartSchema);

@@ -2,8 +2,8 @@ import { Router } from "express";
 import fs from 'fs';
 import { __dirname } from "../utils/utils.js";
 import { multerSingleUploader } from "../utils/multer.js";
-import { ProductDaosMongo } from "../daos/productsDao.mongo.js";
-import CartManagerDB from "../daos/cartsDao.mongo.js";
+import { ProductDaosMongo } from "../daos/MONGO/MONGODBNUBE/productsDao.mongo.js";
+import CartDaoMongo from "../daos/MONGO/MONGODBNUBE/cartsDao.mongo.js";
 import { adminOrUserAuth } from "../middlewares/Auth.middleware.js";
 import { adminAuth } from "../middlewares/Auth.middleware.js";
 
@@ -16,7 +16,7 @@ const productsData = JSON.parse(fs.readFileSync(__dirname + '/file/products.json
 let products = productsData;
 
 const viewsRouter = new Router()
-const manager = new CartManagerDB()
+const manager = new CartDaoMongo()
 
 viewsRouter.get('/', async (req, res) => {
     const { numPage, limit } = req.query;

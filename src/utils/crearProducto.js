@@ -1,4 +1,3 @@
-// import ProductManager from '../managers/product.Manager.js';
 import fs from 'fs';
 import { __dirname } from './utils.js';
 

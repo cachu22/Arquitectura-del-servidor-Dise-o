@@ -2,8 +2,7 @@ import { Schema, model } from "mongoose"
 
 const userCollection = 'users'
 
-const userSchema = new Schema(
-    {
+const userSchema = new Schema({
     first_name: {
         type: String,
         index: true
@@ -26,6 +25,7 @@ const userSchema = new Schema(
         ref: 'Carts' // Referencia al modelo de Carts
     }
 })
-// odm 
+
+// ODM 
 export const userModel = model(userCollection, userSchema)
 

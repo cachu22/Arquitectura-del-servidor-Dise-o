@@ -6,7 +6,7 @@ import sessionsRouter from './api/sessions.router.js';
 import usersRouter from './api/users.router.js';
 import routerMSG from '../daos/messageDao.mongo.js';
 import routerCookie from './Cookies/pruebas.router.js';
-import { cartsRouterMSG } from "./api/carts.routerDB.js";
+import { cartsRouterMSG } from './api/carts.routerDB.js';
 import productsRouterDB from './api/productsRouterDB.js';
 
 const routerApp = Router()
@@ -14,7 +14,7 @@ const routerApp = Router()
 routerApp.use('/api/products', productsRouterLF);
 routerApp.use('/api/carts', cartsRouterFS);
 routerApp.use('/api/sessions', sessionsRouter);
-routerApp.use('/mgProducts', productsRouterDB);
+routerApp.use('/api/mgProducts', productsRouterDB);
 routerApp.use('/api/usersDB', usersRouter);
 routerApp.use('/api/cartsDB', cartsRouterMSG);
 routerApp.use('/', routerMSG);
